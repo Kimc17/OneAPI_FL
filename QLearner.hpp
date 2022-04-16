@@ -26,7 +26,6 @@ public:
     {
         double learning_rate = 0.1;
         double discount_rate = 0.99;
-        double exploration_rate = 1;
         double min_exploration_rate = 0.01;
         double max_exploration_rate = 1;
         double exploration_rate_decay = 0.001;
@@ -39,7 +38,7 @@ public:
             int state = 0;
             int rewards_current_episode = 0;
             // Exploration rate decay
-            exploration_rate = min_exploration_rate + (max_exploration_rate - min_exploration_rate) * exp(-exploration_rate_decay * episode);
+            double exploration_rate = min_exploration_rate + (max_exploration_rate - min_exploration_rate) * exp(-exploration_rate_decay * episode);
 
             for (int step = 1; step <= 100; ++step)
             {
@@ -50,7 +49,14 @@ public:
                 if (exploration_rate < exploration_rate_threshold)
                 {
                     // Take a probably smart action
-                    actionIndex = std::distance(q_table[state], std::max_element(q_table[state], q_table[state] + 4));
+                    for(int i = 0; i < 4 ; ++i)
+                    {
+                        if(q_table[state][actionIndex] < q_table[state][i])
+                        {
+                           actionIndex = i;
+                        }
+                    }
+                    //actionIndex = std::distance(q_table[state], std::max_element(q_table[state], q_table[state] + 4));
                 }
                 else
                 {
@@ -112,8 +118,15 @@ public:
             while (true)
             {
                 // Select an action index
-                int actionIndex = std::distance(q_table[agentState],
-                                                std::max_element(q_table[agentState], q_table[agentState] +4));
+                                    // Take a probably smart action
+                    int actionIndex = 0;
+                    for(int i = 0; i < 4 ; ++i)
+                    {
+                        if(q_table[agentState][actionIndex] < q_table[agentState][i])
+                        {
+                           actionIndex = i;
+                        }
+                    }
                 
                 // Try to move with that action
                 double csprob_n = 0;
