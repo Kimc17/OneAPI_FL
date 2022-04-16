@@ -213,7 +213,7 @@ public:
                 {
                     // Take a probably smart action
                     actionIndex = std::distance(q_table[state], std::max_element(q_table[state], q_table[state] + 4));
-                }
+                } 
                 else
                 {
                     // Take a random action to explore
