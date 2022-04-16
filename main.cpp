@@ -203,14 +203,14 @@ public:
         for (int episode = 1; episode <= totalEpisodes; ++episode)
         {
             env -> reset();
-            int state = 0;
+            //int state = 0;
             int rewards_current_episode = 0;
             // Exploration rate decay
             exploration_rate = min_exploration_rate + (max_exploration_rate - min_exploration_rate) * exp(-exploration_rate_decay * episode);
-
+            int state = env -> getActualState();
             for (int step = 1; step <= 100; ++step)
             {
-               
+                
                 double exploration_rate_threshold = (double)rand() / RAND_MAX;
 
                 int actionIndex = 0;
@@ -226,7 +226,28 @@ public:
                 }
 
                 // Send the action chosen to the environment and get result with reward and state
-                auto result = env -> step(actionIndex);
+                                // Try to move with that action
+                double csprob_n = 0;
+                int ind = 0;
+                double random_n = (double) rand() / RAND_MAX;
+                std::vector<FrozenLake::Result> prob_n = env -> P[state][actionIndex];
+
+                //Calculate cumsum
+                for (int i = 0; i < prob_n.size(); i++)
+                {   
+                    csprob_n += prob_n[i].p;
+                    if (csprob_n > random_n)
+                    {
+                        ind = i;
+                        break;
+                    }
+   
+                }
+                FrozenLake::Result result = env -> P[state][actionIndex][ind];
+
+                //agentState = result.new_state;
+                env -> setActualState(result.new_state);
+
                 //  Update Q-table for Q(s,a) using the Q-Learning formula
                 q_table[state][actionIndex] = q_table[state][actionIndex] * (1 - learning_rate) +
                                               learning_rate * (result.reward + discount_rate *
@@ -273,23 +294,19 @@ public:
         for (int i = 0; i < episodes; ++i)
         {
             int steps = 0;
-            env -> reset();
+            int  agentState = 0;
             while (true)
             {
-                // Get the actual state
-                int agentState = env -> getActualState();
                 // Select an action index
                 int actionIndex = std::distance(q_table[agentState],
                                                 std::max_element(q_table[agentState], q_table[agentState] +4));
+                
                 // Try to move with that action
-                //auto result = env -> step(actionIndex);
-                /*************************************************/
-                //double csprob_n[prob_n.size()] = {0}; 
-                // initialize an accumulator variable
                 double csprob_n = 0;
                 int ind = 0;
                 double random_n = (double) rand() / RAND_MAX;
                 std::vector<FrozenLake::Result> prob_n = env -> P[agentState][actionIndex];
+
                 //Calculate cumsum
                 for (int i = 0; i < prob_n.size(); i++)
                 {   
@@ -302,9 +319,8 @@ public:
    
                 }
                 FrozenLake::Result result = env -> P[agentState][actionIndex][ind];
-                env -> setActualState(result.new_state);
 
-                /********************************* **************/
+                agentState = result.new_state;
 
                 // Verify if the game is done
                 if (result.done)
