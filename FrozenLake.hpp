@@ -124,29 +124,4 @@ private:
             }
         }
     }
-
-    int categorical_sample(std::vector<Result> prob_n)
-    {
- 
-        double csprob_n[prob_n.size()] = {0}; 
-        // initialize an accumulator variable
-        double acc = 0;
-        //Calculate cumsum
-        for (int i = 0; i < prob_n.size(); i++)
-        {
-            acc += prob_n[i].p;
-            csprob_n[i] = acc;
-        }
-
-        double random_n = (double) rand() / RAND_MAX;
-
-        for (int i = 0; i < prob_n.size(); ++i)
-        {
-            if (csprob_n[i] > random_n)
-            {
-                return i;
-            }
-        }
-        return 0;
-    }
 };

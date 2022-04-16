@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <vector>
 #include <ctime> 
-#include "FrozenLake.hpp"
 #include "QLearner.hpp"
 
 using namespace std;
