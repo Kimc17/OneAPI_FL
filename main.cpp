@@ -36,8 +36,6 @@ private:
         'F', 'F', 'F', 'H',
         'H', 'F', 'F', 'G'};
     int actualState;
-    //std::vector<Result> P[N * N][4];
-    
     
 public:
     FrozenLake() // FrozenLakeEnv
@@ -46,28 +44,6 @@ public:
         calculate_p();
     }
 
-public:
-    Result step(int a)
-    {
-        int i = categorical_sample(P[actualState][a]);
-        Result result = P[actualState][a][i];
-        actualState = result.new_state;
-        return result;
-    }
-    void reset()
-    {
-        actualState = 0;
-    }
-
-    int getActualState() const
-    {
-        return actualState;
-    }
-
-    void setActualState(int state)
-    {
-        actualState = state;
-    }
 
 private:
     int inc(int row, int col, int action)
@@ -202,12 +178,11 @@ public:
 
         for (int episode = 1; episode <= totalEpisodes; ++episode)
         {
-            env -> reset();
-            //int state = 0;
+            int state = 0;
             int rewards_current_episode = 0;
             // Exploration rate decay
             exploration_rate = min_exploration_rate + (max_exploration_rate - min_exploration_rate) * exp(-exploration_rate_decay * episode);
-            int state = env -> getActualState();
+
             for (int step = 1; step <= 100; ++step)
             {
                 
@@ -226,7 +201,7 @@ public:
                 }
 
                 // Send the action chosen to the environment and get result with reward and state
-                                // Try to move with that action
+                // Try to move with that action
                 double csprob_n = 0;
                 int ind = 0;
                 double random_n = (double) rand() / RAND_MAX;
@@ -245,15 +220,13 @@ public:
                 }
                 FrozenLake::Result result = env -> P[state][actionIndex][ind];
 
-                //agentState = result.new_state;
-                env -> setActualState(result.new_state);
-
                 //  Update Q-table for Q(s,a) using the Q-Learning formula
                 q_table[state][actionIndex] = q_table[state][actionIndex] * (1 - learning_rate) +
                                               learning_rate * (result.reward + discount_rate *
                                                                                    *(std::max_element(q_table[result.new_state], q_table[result.new_state] + 4)));
                 // Move to the next state and add the reward gotten
                 state = result.new_state;
+                
                 rewards_current_episode += result.reward;
                 // Break if fail or goal were reached
                 if (result.done)
@@ -268,23 +241,6 @@ public:
         int turn = 1;
         int sum = 0;
         double average = 0;
-
-        /**for (int i = 0; i < totalEpisodes; ++i)
-        {
-            if (count < 1000)
-            {
-                sum += rewards_all_episodes[i];
-            }
-            else
-            {
-                average = (double)sum / 1000;
-                cout << count * turn << " : " << average << endl;
-                count = 0;
-                turn += 1;
-                sum = 0;
-            }
-            count += 1;
-        }*/
     }
 
     void play(FrozenLake *env, int episodes) const
