@@ -27,6 +27,8 @@ public:
         bool done;
     };
 
+    std::vector<Result> P[N * N][4];
+
 private:
     char m_board[16] = {
         'S', 'F', 'F', 'F',
@@ -35,7 +37,7 @@ private:
         'H', 'F', 'F', 'G'};
     int actualState;
     //std::vector<Result> P[N * N][4];
-    std::vector<Result> P[N * N][4];
+    
     
 public:
     FrozenLake() // FrozenLakeEnv
@@ -186,7 +188,7 @@ private:
     double q_table[N * N][4];
 
 public:
-    void learn(FrozenLake &env, int totalEpisodes)
+    void learn(FrozenLake *env, int totalEpisodes)
     {
         double learning_rate = 0.1;
         double discount_rate = 0.99;
@@ -200,7 +202,7 @@ public:
 
         for (int episode = 1; episode <= totalEpisodes; ++episode)
         {
-            env.reset();
+            env -> reset();
             int state = 0;
             int rewards_current_episode = 0;
             // Exploration rate decay
@@ -224,7 +226,7 @@ public:
                 }
 
                 // Send the action chosen to the environment and get result with reward and state
-                auto result = env.step(actionIndex);
+                auto result = env -> step(actionIndex);
                 //  Update Q-table for Q(s,a) using the Q-Learning formula
                 q_table[state][actionIndex] = q_table[state][actionIndex] * (1 - learning_rate) +
                                               learning_rate * (result.reward + discount_rate *
@@ -264,23 +266,45 @@ public:
         }*/
     }
 
-    void play(FrozenLake &env, int episodes) const
+    void play(FrozenLake *env, int episodes) const
     {
         srand(time(0));
         float misses = 0;
         for (int i = 0; i < episodes; ++i)
         {
             int steps = 0;
-            env.reset();
+            env -> reset();
             while (true)
             {
                 // Get the actual state
-                int agentState = env.getActualState();
+                int agentState = env -> getActualState();
                 // Select an action index
                 int actionIndex = std::distance(q_table[agentState],
                                                 std::max_element(q_table[agentState], q_table[agentState] +4));
                 // Try to move with that action
-                auto result = env.step(actionIndex);
+                //auto result = env -> step(actionIndex);
+                /*************************************************/
+                //double csprob_n[prob_n.size()] = {0}; 
+                // initialize an accumulator variable
+                double csprob_n = 0;
+                int ind = 0;
+                double random_n = (double) rand() / RAND_MAX;
+                std::vector<FrozenLake::Result> prob_n = env -> P[agentState][actionIndex];
+                //Calculate cumsum
+                for (int i = 0; i < prob_n.size(); i++)
+                {   
+                    csprob_n += prob_n[i].p;
+                    if (csprob_n > random_n)
+                    {
+                        ind = i;
+                        break;
+                    }
+   
+                }
+                FrozenLake::Result result = env -> P[agentState][actionIndex][ind];
+                env -> setActualState(result.new_state);
+
+                /********************************* **************/
 
                 // Verify if the game is done
                 if (result.done)
@@ -297,7 +321,6 @@ public:
                         break;
                     }
                 }
-
                 steps++;
             }
         }
@@ -332,22 +355,22 @@ public:
 
 int main()
 {
-    FrozenLake env;
-    QLearner agent;
+    FrozenLake* env = new FrozenLake();
+    QLearner* agent = new QLearner();
 
     unsigned t0, t1;
     double time;
 
     t0=clock();
-    agent.learn(env, 1000000);
+    agent -> learn(env, 1000000);
     t1 = clock();
     time = (double(t1-t0)/CLOCKS_PER_SEC);
     cout << "Learning time: " << time << endl;
 
-    agent.print();
+    agent -> print();
 
     t0=clock();
-    agent.play(env, 10000);
+    agent -> play(env, 10000);
     t1 = clock();
     time = (double(t1-t0)/CLOCKS_PER_SEC);
     cout << "Playing time: " << time << " for 10000 cases" << endl;
