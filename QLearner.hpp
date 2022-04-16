@@ -84,10 +84,17 @@ public:
                 }
                 FrozenLake::Result result = env -> P[state][actionIndex][ind];
 
+                double max = q_table[result.new_state][0];
+                for (int i = 0; i < 4; ++ i)
+                {
+                    if(max < q_table[result.new_state][i])
+                    {
+                        max = q_table[result.new_state][i];
+                    }
+                }
+
                 //  Update Q-table for Q(s,a) using the Q-Learning formula
-                q_table[state][actionIndex] = q_table[state][actionIndex] * (1 - learning_rate) +
-                                              learning_rate * (result.reward + discount_rate *
-                                                                                   *(std::max_element(q_table[result.new_state], q_table[result.new_state] + 4)));
+                q_table[state][actionIndex] = q_table[state][actionIndex] * (1 - learning_rate) + learning_rate * (result.reward + discount_rate * max);
                 // Move to the next state and add the reward gotten
                 state = result.new_state;
                 
