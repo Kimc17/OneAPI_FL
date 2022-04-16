@@ -113,10 +113,20 @@ public:
 
                 //  Update Q-table for Q(s,a) using the Q-Learning formula
                 b[state][actionIndex] = a[state][actionIndex] * (1 - learning_rate) +  learning_rate * (result.reward + discount_rate * max);
+                
                 // Move to the next state and add the reward gotten
-                state = result.new_state;
-
-                rewards_current_episode += result.reward;
+                //const int state =  c[state][actionIndex].data()[ind].new_state;
+                
+                if(state == 15)
+                {
+                    state = 0;
+                }
+                else 
+                {
+                    //const int state = result.new_state;
+                    state += 1;
+                }
+     
                 // Break if fail or goal were reached
                 if (result.done)
                     break;
