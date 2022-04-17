@@ -56,7 +56,6 @@ public:
                            actionIndex = i;
                         }
                     }
-                    //actionIndex = std::distance(q_table[state], std::max_element(q_table[state], q_table[state] + 4));
                 }
                 else
                 {
@@ -72,7 +71,7 @@ public:
                 std::vector<FrozenLake::Result> prob_n = env -> P[state][actionIndex];
 
                 //Calculate cumsum
-                for (int i = 0; i < prob_n.size(); i++)
+                for (int i = 0; i < (prob_n.size()); i++)
                 {   
                     csprob_n += prob_n[i].p;
                     if (csprob_n > random_n)
@@ -80,27 +79,27 @@ public:
                         ind = i;
                         break;
                     }
-   
                 }
-                FrozenLake::Result result = env -> P[state][actionIndex][ind];
+                FrozenLake::Result* result = new FrozenLake::Result;
+                *result = env -> P[state][actionIndex][ind];
 
-                double max = q_table[result.new_state][0];
+                double max = q_table[result -> new_state][0];
                 for (int i = 0; i < 4; ++ i)
                 {
-                    if(max < q_table[result.new_state][i])
+                    if(max < q_table[result -> new_state][i])
                     {
-                        max = q_table[result.new_state][i];
+                        max = q_table[result -> new_state][i];
                     }
                 }
 
                 //  Update Q-table for Q(s,a) using the Q-Learning formula
-                q_table[state][actionIndex] = q_table[state][actionIndex] * (1 - learning_rate) + learning_rate * (result.reward + discount_rate * max);
+                q_table[state][actionIndex] = q_table[state][actionIndex] * (1 - learning_rate) + learning_rate * (result -> reward + discount_rate * max);
                 // Move to the next state and add the reward gotten
-                state = result.new_state;
+                state = result -> new_state;
                 
-                rewards_current_episode += result.reward;
+                rewards_current_episode += result -> reward;
                 // Break if fail or goal were reached
-                if (result.done)
+                if (result -> done)
                     break;
             }
 
@@ -108,10 +107,6 @@ public:
             // Save total reward from episode
             rewards_all_episodes[episode] = rewards_current_episode;
         }
-        int count = 0;
-        int turn = 1;
-        int sum = 0;
-        double average = 0;
     }
 
     void play(FrozenLake *env, int episodes) const

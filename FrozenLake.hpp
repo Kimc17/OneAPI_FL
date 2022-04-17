@@ -20,13 +20,13 @@ int to_s(int row, int col)
 class FrozenLake
 {
 public:
-    struct Result
+    typedef struct 
     {
         double p;
         int new_state;
         double reward;
         bool done;
-    };
+    } Result;
 
     std::vector<Result> P[N * N][4];
 
@@ -45,8 +45,6 @@ public:
         calculate_p();
     }
 
-
-private:
     int inc(int row, int col, int action)
     {
         if (action == LEFT)
@@ -67,23 +65,25 @@ private:
         }
         return to_s(row, col);
     }
+
+private:
     Result update_probability_matrix(int row, int col, int action)
     {
-        Result result;
-        result.new_state = inc(row, col, action);
-        result.reward = 0.0;
-        result.done = false;
+        Result* result = new Result;
+        result -> new_state = inc(row, col, action);
+        result -> reward = 0.0;
+        result -> done = false;
 
-        if (m_board[result.new_state] == 'H')
+        if (m_board[result -> new_state] == 'H')
         {
-            result.done = true;
+            result -> done = true;
         }
-        else if (m_board[result.new_state] == 'G')
+        else if (m_board[result -> new_state] == 'G')
         {
-            result.reward = 1.0;
-            result.done = true;
+            result -> reward = 1.0;
+            result -> done = true;
         }
-        return result;
+        return *result;
     }
 
     void calculate_p()
@@ -96,29 +96,29 @@ private:
                 for (int a = 0; a < 4; ++a)
                 {
                     char letter = m_board[s];
-                    Result r;
+                    Result* r = new Result;
                     int b;
 
                     if (letter == 'G' | letter == 'H')
                     {
-                        r = {1.0, s, 0.0, true};
-                        P[s][a].push_back(r);
+                        *r = {1.0, s, 0.0, true};
+                        P[s][a].push_back(*r);
                     }
                     else
                     {
                         b = (((a - 1) % 4) + 4) % 4;
-                        r = update_probability_matrix(row, col, b);
-                        r.p = 1.0 / 3.0;
-                        P[s][a].push_back(r);
+                        *r = update_probability_matrix(row, col, b);
+                        r -> p = 1.0 / 3.0;
+                        P[s][a].push_back(*r);
 
-                        r = update_probability_matrix(row, col, a);
-                        r.p = 1.0 / 3.0;
-                        P[s][a].push_back(r);
+                        *r = update_probability_matrix(row, col, a);
+                        r -> p = 1.0 / 3.0;
+                        P[s][a].push_back(*r);
 
                         b = (((a + 1) % 4) + 4) % 4;
-                        r = update_probability_matrix(row, col, b);
-                        r.p = 1.0 / 3.0;
-                        P[s][a].push_back(r);
+                        *r = update_probability_matrix(row, col, b);
+                        r -> p = 1.0 / 3.0;
+                        P[s][a].push_back(*r);
                     }
                 }
             }
